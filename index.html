@@ -473,7 +473,7 @@ function scoreCell(matchId){
       if(p1!=='' && p2!=='' && Number(p1)!==Number(p2)){
         return `<div class="score-box">${sc.s1} - ${sc.s2} <span style="font-size:11px;color:var(--text-dim);font-weight:600;">(luân lưu ${p1}-${p2})</span></div>`;
       }
-      return `<div class="score-box">${sc.s1} - ${sc.s2} <span style="font-size:11px;color:var(--text-dim);font-weight:600;">(hòa - chờ luân lưu)</span></div>`;
+      return `<div class="score-box">${sc.s1} - ${sc.s2}</div>`;
     }
     return `<div class="score-box">${sc.s1} - ${sc.s2}</div>`;
   }
@@ -501,21 +501,22 @@ async function submitScore(matchId){
     const p2El = document.getElementById('p2_'+matchId);
     const p1 = p1El ? p1El.value : '';
     const p2 = p2El ? p2El.value : '';
-    if(p1 === '' || p2 === ''){
-      showMessage('Hai đội hòa nhau, nhập thêm tỉ số luân lưu để xác định đội thắng.');
-      return;
+    if(p1 !== '' && p2 !== ''){
+      if(Number(p1) === Number(p2)){
+        showMessage('Tỉ số luân lưu không được hòa nhau.');
+        return;
+      }
+      payload.p1 = Number(p1);
+      payload.p2 = Number(p2);
     }
-    if(Number(p1) === Number(p2)){
-      showMessage('Tỉ số luân lưu không được hòa nhau.');
-      return;
-    }
-    payload.p1 = Number(p1);
-    payload.p2 = Number(p2);
   }
 
   await saveScore(matchId, payload.s1, payload.s2, payload.p1, payload.p2);
   renderSchedule();
   renderStandings();
+  if(isKnockoutMatch(matchId) && Number(s1) === Number(s2) && (payload.p1===undefined || payload.p2===undefined)){
+    showMessage('Đã lưu tỉ số hòa. Nhập tỉ số luân lưu khi có kết quả.', false);
+  }
 }
 
 function renderSchedule(){
